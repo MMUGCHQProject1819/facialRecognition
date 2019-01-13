@@ -14,5 +14,6 @@ print(max_val, max_loc)
 cv2.circle(result, max_loc, 15, 255, 2) #circles brightest spot in result picture
 cv2.imshow("Matching", result)
 
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()
