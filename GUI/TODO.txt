@@ -1,0 +1,3 @@
+- Test date on db input
+- lots of error testing
+- design the main interface
