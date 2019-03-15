@@ -16,4 +16,4 @@ CREATE TABLE `photos` (
   `image` mediumblob,
   `encoding` text,
   `encoded` int(1) DEFAULT NULL
-);1
+);
