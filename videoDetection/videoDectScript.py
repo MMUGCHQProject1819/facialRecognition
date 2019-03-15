@@ -50,9 +50,9 @@ if __name__ == "__main__":
     writer = None
 
 
-    while True:
+    while True: #cut out rest of the video (use opencv to cut faces out)
 
-        (grabbed, frame) = vidStream.read()
+        (grabbed, frame) = vidStream.read() # skip a certain number of frames
 
         if not grabbed: # if we havent got a frame were at the end of the video
             break
@@ -72,7 +72,7 @@ if __name__ == "__main__":
             for x in range(len(Encodings["encoding"])):
                 result = face_recognition.compare_faces(known_encoding[j - 1], Encodings["encoding"][x])
                 print(result)
-        
+
                 if result[0] == True:
                     name = Encodings["name"][x]
                     counts[name] = counts.get(name, 0) + 1
@@ -96,25 +96,25 @@ if __name__ == "__main__":
             bottom = int(bottom * r)
             left = int(left * r)
 
-            cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2) 
-            
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+
             y = top - 15 if top - 15 > 15 else top + 15
-            
+
             cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
 
             if writer is not None:
                 writer.write(frame)
-            
+
 
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
- 
+
         if key == ord("q"):
             break
 
     cv2.destroyAllWindows()
 
     vidStream.release()
- 
+
     if writer is not None:
         writer.release()

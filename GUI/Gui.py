@@ -1,5 +1,6 @@
 import os
 from tkinter import *
+from tkinter import messagebox
 from tkinter.ttk import *
 from tkinter import filedialog
 
@@ -10,21 +11,57 @@ root = None
 DAO = None
 
 class mainWindow(Tk):
+
+    directory = None # defined here so can tell if directory has been selected or not
+
     def __init__(self):
         Tk.__init__(self)
         self.title("Face Recognition")
+        self.back = Frame(self, width=50, height=100)
+        self.back.grid()
         self.root_menu  = Menu(self)
         self.config(menu = self.root_menu)
 
         self.file_menu = Menu(self.root_menu)
         self.root_menu.add_cascade(label = "File", menu = self.file_menu)
         self.file_menu.add_command(label = "Exit", command = self.destroy)
-        #self.file_menu.add_separator() 
 
         self.database_menu = Menu(self.root_menu)
         self.root_menu.add_cascade(label = "Database", menu = self.database_menu)
         self.database_menu.add_command(label = "Add Person", command=initAdd)        
+        self.database_menu.add_command(label = "Add Photo", command=initPhoto)        
         self.database_menu.add_command(label = "Run Encoder", command=initEncode)
+        
+        self.filebtn = Button(self, text="Video/Image path", command=self.btnFile)
+        self.filebtn.grid(row = 0, column = 0)
+        self.filepath = Text(self, width = 30, height = 1,state= DISABLED)
+        self.filepath.grid(row = 1, column = 0)
+        self.runImage = Button(self, text="Run Image", command=self.btnImg)
+        self.runImage.grid(row=0,column=1)
+        self.runVideo = Button(self, text="Run Video", command=self.btnVideo)
+        self.runVideo.grid(row=1,column=1)
+
+    def btnFile(self):
+        self.directory = filedialog.askopenfilename(initialdir = "C:\\",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
+        self.filepath.configure(state = NORMAL)
+        self.filepath.insert(INSERT,"")
+        self.filepath.insert(INSERT,str(os.path.basename(self.directory)))
+        self.filepath.configure(state = DISABLED)
+
+    def btnImg(self):
+        if self.directory is not None:
+            addToEncoding(DAO.getEncoded())
+            faceDectImage(self.directory)
+        else:
+            messagebox.showerror("Error","No input image/video selected.")
+
+    def btnVideo(self):
+        if self.directory is not None:
+            addToEncoding(DAO.getEncoded())
+            faceDectVideo(self.directory)
+        else:
+            messagebox.showerror("Error","No input image/video selected.")
+
 
 class encodeWindow(Toplevel):
     def __init__(self):
@@ -44,7 +81,7 @@ class encodeWindow(Toplevel):
             img = DAO.convertFromBinaryB64(x[1])
             img.save('img/temp/image.png')
             encoding = getEncoding(cv2.imread('img/temp/image.png'))
-            DAO.updateEncoding(x[0],encoding)
+            DAO.updateEncoding(x[0],encoding[0])
             self.prog['value'] += self.frac
             self.update_idletasks()
         
@@ -93,13 +130,55 @@ class addWindow(Toplevel):
 
     def btnClick(self):
         try:
-            newperson = Person(self.pid.get(),self.name.get(),self.dob.get(),self.nationality.get(),self.height.get(),self.weight.get(),self.hair_colour.get(),self.hair_style.get(),self.skin_colour.get(),self.facial_hair.get(), DAO.convertToBinaryB64(filename=str(self.directory)))
-            DAO.insertPerson(newperson)
+            newperson = Person(self.pid.get(),self.name.get().lower(),self.dob.get(),self.nationality.get(),self.height.get(),self.weight.get(),self.hair_colour.get(),self.hair_style.get(),self.skin_colour.get(),self.facial_hair.get())
+            newphoto = Photo(self.pid.get(),  DAO.convertToBinaryB64(filename=str(self.directory)))
+            DAO.insertPerson(newperson, newphoto)
         except Error as e:
             messagebox.showerror("Error", "Invaild input.")
 
     def btnFile(self):
-        self.directory = filedialog.askopenfilename(initialdir = "C:\\",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
+        self.directory = filedialog.askopenfilename(initialdir = "C:\\", title = "Select file", filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
+        self.image.configure(state = NORMAL)
+        self.image.insert(INSERT,str(os.path.basename(self.directory)))
+        self.image.configure(state = DISABLED)
+
+class addPhoto(Toplevel):
+    def __init__(self):
+        Toplevel.__init__(self)
+        Label(self, text = "Name").grid(row = 1) 
+        self.name = Entry(self)
+        self.name.grid(row = 1, column = 1) 
+        self.namebtn = Button(self, text="Find PID", command=self.btnName)
+        self.namebtn.grid(row = 1, column = 2)
+        Label(self, text = "PID").grid(row = 2) 
+        self.pid = Entry(self)
+        self.pid.grid(row = 2, column = 1) 
+        Label(self, text = "Image path").grid(row = 3) 
+        self.image = Text(self, width = 30, height = 1,state= DISABLED)
+        self.image.grid(row = 3, column = 1) 
+        self.filebtn = Button(self, text="File path", command=self.btnFile)
+        self.filebtn.grid(row = 3, column = 3)
+       
+
+        sumbitbtn = Button(self, text="Sumbit", command=self.btnClick).grid(row = 12)
+
+    def btnClick(self):
+        try:
+            newphoto = Photo(self.pid.get(), DAO.convertToBinaryB64(filename=str(self.directory)))
+            DAO.insertPhoto(newphoto)
+        except Error as e:
+            messagebox.showerror("Error", "Invaild input.")
+
+    def btnName(self):
+        try:
+            pid = DAO.getName(self.name.get().lower())[0]
+            self.pid.insert(INSERT,"")
+            self.pid.insert(INSERT,pid)
+        except Error as e:
+            messagebox.showerror("Error", "Invaild input.")
+
+    def btnFile(self):
+        self.directory = filedialog.askopenfilename(initialdir = "C:\\", title = "Select file", filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
         self.image.configure(state = NORMAL)
         self.image.insert(INSERT,str(os.path.basename(self.directory)))
         self.image.configure(state = DISABLED)
@@ -116,8 +195,10 @@ def initMain():
     root = mainWindow()
     root.mainloop()
 
+def initPhoto():
+    ph = addPhoto()
+    ph.mainloop()
 
 if __name__ == "__main__":
     DAO = personDAO()
     initMain()
-    

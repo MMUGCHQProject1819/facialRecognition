@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\img",
+    "\\img\\temp",
+    "\\__pycache__"
   ],
-  "SelectedNode": "\\Gui.py",
+  "SelectedNode": "\\faceEncoding.py",
   "PreviewInSolutionExplorer": false
 }

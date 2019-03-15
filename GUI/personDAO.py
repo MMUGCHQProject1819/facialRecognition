@@ -2,6 +2,7 @@ import os
 import sys
 import io
 import base64
+import json
 from PIL import Image
 import PIL.Image
 import mysql.connector
@@ -10,7 +11,7 @@ from mysql.connector import Error
 from mysql.connector import errorcode
 
 class Person:
-    def __init__(self, pid, name = None, dob = None, nationality = None, height = 0, weight = 0, hair_colour = None, hair_style = None, skin_colour = None, facial_hair = None, image = None, encoding = None, encoded = None):
+    def __init__(self, pid, name = None, dob = None, nationality = None, height = 0, weight = 0, hair_colour = None, hair_style = None, skin_colour = None, facial_hair = None):
         self.pid = pid
         self.name = name 
         self.dob = dob
@@ -21,9 +22,13 @@ class Person:
         self.hair_style = hair_style
         self.skin_colour = skin_colour
         self.facial_hair = facial_hair
+        
+class Photo:
+    def __init__(self, pid, image = None, encoding = None, encoded = None):
+        self.pid = pid
         self.image = image
         self.encoding = encoding
-        self.encoded = encoded 
+        self.encoded = encoded
 
 class personDAO:
     def __init__(self):
@@ -47,11 +52,24 @@ class personDAO:
         imgbyte = base64.b64decode(data)
         return Image.open(io.BytesIO(imgbyte))
 
-    def insertPerson(self, p): # p = person object
+    def insertPerson(self, person, photo): # p = person object
         try:
             self.mydb = self.connectToMysql()
             self.mycursor = self.mydb.cursor()
-            self.mycursor.execute("INSERT INTO person (pid, name, dob, nationality, height, weight, hair_colour, hair_style, skin_colour,facial_hair,image,encoding,encoded) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (int(p.pid),p.name,p.dob,p.nationality,int(p.height),int(p.weight),p.hair_colour,p.hair_style,p.skin_colour,p.facial_hair,p.image,'','0'))
+            self.mycursor.execute("INSERT INTO person (pid, name, dob, nationality, height, weight, hair_colour, hair_style, skin_colour,facial_hair) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (int(person.pid),person.name,person.dob,person.nationality,int(person.height),int(person.weight),person.hair_colour,person.hair_style,person.skin_colour,person.facial_hair))
+            self.mycursor.execute("INSERT INTO photos (pid,image,encoding,encoded) VALUES ('%s','%s','%s','%s')" % (int(photo.pid),photo.image,'','0'))
+            self.mydb.commit()
+        except Error as e:
+            print(e)
+        finally:
+            self.mycursor.close()
+            self.mydb.close()
+
+    def insertPhoto(self, photo): # p = person object
+        try:
+            self.mydb = self.connectToMysql()
+            self.mycursor = self.mydb.cursor()
+            self.mycursor.execute("INSERT INTO photos (pid,image,encoding,encoded) VALUES ('%s','%s','%s','%s')" % (int(photo.pid),photo.image,'','0'))
             self.mydb.commit()
         except Error as e:
             print(e)
@@ -63,7 +81,8 @@ class personDAO:
         try:
             self.mydb = self.connectToMysql()
             self.mycursor = self.mydb.cursor()
-            self.mycursor.execute("UPDATE person SET encoding='%s', encoded='1' WHERE pid='%s'" % (encoding,pid))
+            temp = json.dumps(encoding.tolist())
+            self.mycursor.execute("UPDATE photos SET encoding='%s', encoded='1' WHERE pid='%s'" % (temp,pid))
             self.mydb.commit()
         except Error as e:
             print(e)
@@ -75,7 +94,37 @@ class personDAO:
         try:
             self.mydb = self.connectToMysql()
             self.mycursor = self.mydb.cursor()
-            self.mycursor.execute("SELECT pid,image FROM person WHERE encoded ='0'")
+            self.mycursor.execute("SELECT pid,image FROM photos WHERE encoded ='0'")
+            self.result = self.mycursor.fetchall()
+            self.mydb.commit()
+        except Error as e:
+            print(e)
+        else:
+            return self.result
+        finally:
+            self.mycursor.close()
+            self.mydb.close()
+
+    def getEncoded(self): 
+        try:
+            self.mydb = self.connectToMysql()
+            self.mycursor = self.mydb.cursor()
+            self.mycursor.execute("SELECT photos.pid,person.name,photos.encoding FROM photos INNER JOIN person ON photos.pid = person.pid WHERE photos.encoded ='1'")
+            self.result = self.mycursor.fetchall()
+            self.mydb.commit()
+        except Error as e:
+            print(e)
+        else:
+            return self.result
+        finally:
+            self.mycursor.close()
+            self.mydb.close()
+
+    def getName(self, name): 
+        try:
+            self.mydb = self.connectToMysql()
+            self.mycursor = self.mydb.cursor()
+            self.mycursor.execute("SELECT pid FROM person WHERE name='%s'" % (name))
             self.result = self.mycursor.fetchall()
             self.mydb.commit()
         except Error as e:

@@ -1,0 +1,5 @@
+/GUI/.vs/
+/GUI/__pycache__/
+/GUI/TODO.txt
+*.pyc
+*.pyo
