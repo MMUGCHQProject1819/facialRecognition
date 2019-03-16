@@ -54,18 +54,21 @@ def faceDectImage(imagePath):
                 name = Encodings["name"][x]
                 counts[name] = counts.get(name, 0) + 1
 
-        name = max(counts, key=counts.get)
+        if counts:
+            name = max(counts, key=counts.get)
 
-        names.append(name)
+            names.append(name)
 
-        print(counts)
-        print(name)
+            print(counts)
+            print(name)
+        else:
+            names.append("unknown")
 
     gray = cv2.cvtColor(known, cv2.COLOR_BGR2GRAY)
 
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-    names.reverse()
+    #names.reverse()
 
     for ((top, right, bottom, left), name) in zip(boxes, names):
 		# rescale the face coordinates
@@ -100,7 +103,7 @@ def faceDectVideo(filePath):
     while True:
         count += 1
 
-        if count % 1 == 0:
+        if count % 30 == 0:
             (grabbed, frame) = vidStream.read()
 
             if not grabbed: # if we havent got a frame were at the end of the video
@@ -113,21 +116,21 @@ def faceDectVideo(filePath):
 
             boxes = face_recognition.face_locations(frame, 1,"hog")
 
-            print(boxes)
+            #print(boxes)
 
             for j in range(len(known_encoding)):
                 counts = {}
 
                 for x in range(len(Encodings["encoding"])):
-                    print("Known encoding: {0}  {1}".format(type(known_encoding[j]), known_encoding[j]))
-                    print("Encoding:  {0}   {1}".format(type(Encodings["encoding"][x]), Encodings["encoding"][x]))
+                    #print("Known encoding: {0}  {1}".format(type(known_encoding[j]), known_encoding[j]))
+                    #print("Encoding:  {0}   {1}".format(type(Encodings["encoding"][x]), Encodings["encoding"][x]))
                     temp = numpy.asarray(Encodings["encoding"][x])
-                    print("Encoding:  {0}   {1}".format(type(temp), temp))
+                    #print("Encoding:  {0}   {1}".format(type(temp), temp))
 
-                    print("J: {0}".format(str(j)))
-                    print("X: {0}".format(str(x)))
+                    #print("J: {0}".format(str(j)))
+                    #print("X: {0}".format(str(x)))
 
-                    print(numpy.array_equal(known_encoding[j],temp))
+                    #print(numpy.array_equal(known_encoding[j],temp))
 
                     result = face_recognition.compare_faces([known_encoding[j]], temp) #, tolerance = 0.6
         
@@ -135,12 +138,14 @@ def faceDectVideo(filePath):
                         name = Encodings["name"][x]
                         counts[name] = counts.get(name, 0) + 1
 
-                if len(counts) != 0:
+                if counts:
                     name = max(counts, key=counts.get)
                     names.append(name)
+                else:
+                    names.append("unknown")
 
-                print(counts)
-                print(name)
+                #print(counts)
+                #print(name)
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 

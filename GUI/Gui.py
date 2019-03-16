@@ -46,7 +46,7 @@ class mainWindow(Tk):
     def btnFile(self):
         self.directory = filedialog.askopenfilename(initialdir = "C:\\",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
         self.filepath.configure(state = NORMAL)
-        self.filepath.insert(INSERT,"")
+        self.filepath.delete('1.0', END)
         self.filepath.insert(INSERT,str(os.path.basename(self.directory)))
         self.filepath.configure(state = DISABLED)
 
@@ -145,6 +145,7 @@ class addWindow(Toplevel):
     def btnFile(self):
         self.directory = filedialog.askopenfilename(initialdir = "C:\\", title = "Select file", filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
         self.image.configure(state = NORMAL)
+        self.image.delete('1.0', END)
         self.image.insert(INSERT,str(os.path.basename(self.directory)))
         self.image.configure(state = DISABLED)
 
@@ -186,6 +187,7 @@ class addPhoto(Toplevel):
     def btnFile(self):
         self.directory = filedialog.askopenfilename(initialdir = "C:\\", title = "Select file", filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
         self.image.configure(state = NORMAL)
+        self.image.delete('1.0', END)
         self.image.insert(INSERT,str(os.path.basename(self.directory)))
         self.image.configure(state = DISABLED)
 

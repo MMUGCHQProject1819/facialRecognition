@@ -60,6 +60,8 @@ class personDAO:
             self.mycursor.execute("INSERT INTO photos (pid,image,encoding,encoded) VALUES ('%s','%s','%s','%s')" % (int(photo.pid),photo.image,'','0'))
             self.mydb.commit()
         except Error as e:
+            if "10053" in str(e):
+                print("File to big, this can be fixed in the mysql config just google the error message.")
             print(e)
         finally:
             self.mycursor.close()
@@ -72,6 +74,8 @@ class personDAO:
             self.mycursor.execute("INSERT INTO photos (pid,image,encoding,encoded) VALUES ('%s','%s','%s','%s')" % (int(photo.pid),photo.image,'','0'))
             self.mydb.commit()
         except Error as e:
+            if "10053" in str(e):
+                print("File to big, this can be fixed in the mysql config just google the error message.")
             print(e)
         finally:
             self.mycursor.close()
