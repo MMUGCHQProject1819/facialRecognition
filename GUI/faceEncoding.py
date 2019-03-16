@@ -90,13 +90,17 @@ def faceDectVideo(filePath):
     names = []
     count = 0
 
-    vidStream = cv2.VideoCapture(filePath)
+    if filePath is None:
+        vidStream = cv2.VideoCapture(0)
+    else:
+        vidStream = cv2.VideoCapture(filePath)
+
     writer = None
 
     while True:
         count += 1
 
-        if count % 60 == 0:
+        if count % 1 == 0:
             (grabbed, frame) = vidStream.read()
 
             if not grabbed: # if we havent got a frame were at the end of the video

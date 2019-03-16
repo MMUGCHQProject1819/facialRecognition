@@ -40,6 +40,8 @@ class mainWindow(Tk):
         self.runImage.grid(row=0,column=1)
         self.runVideo = Button(self, text="Run Video", command=self.btnVideo)
         self.runVideo.grid(row=1,column=1)
+        self.runWebcam = Button(self, text="Run Webcam", command=self.btnWebcam)
+        self.runWebcam.grid(row=2,column=1)
 
     def btnFile(self):
         self.directory = filedialog.askopenfilename(initialdir = "C:\\",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
@@ -61,6 +63,10 @@ class mainWindow(Tk):
             faceDectVideo(self.directory)
         else:
             messagebox.showerror("Error","No input image/video selected.")
+
+    def btnWebcam(self):
+        addToEncoding(DAO.getEncoded())
+        faceDectVideo(None)
 
 
 class encodeWindow(Toplevel):
