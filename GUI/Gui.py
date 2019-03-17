@@ -53,20 +53,20 @@ class mainWindow(Tk):
     def btnImg(self):
         if self.directory is not None:
             addToEncoding(DAO.getEncoded())
-            faceDectImage(self.directory)
+            faceDectImage(self.directory, DAO)
         else:
             messagebox.showerror("Error","No input image/video selected.")
 
     def btnVideo(self):
         if self.directory is not None:
             addToEncoding(DAO.getEncoded())
-            faceDectVideo(self.directory)
+            faceDectVideo(self.directory, DAO)
         else:
             messagebox.showerror("Error","No input image/video selected.")
 
     def btnWebcam(self):
         addToEncoding(DAO.getEncoded())
-        faceDectVideo(None)
+        faceDectVideo(None, DAO)
 
 
 class encodeWindow(Toplevel):
@@ -139,8 +139,10 @@ class addWindow(Toplevel):
             newperson = Person(self.pid.get(),self.name.get().lower(),self.dob.get(),self.nationality.get(),self.height.get(),self.weight.get(),self.hair_colour.get(),self.hair_style.get(),self.skin_colour.get(),self.facial_hair.get())
             newphoto = Photo(self.pid.get(),  DAO.convertToBinaryB64(filename=str(self.directory)))
             DAO.insertPerson(newperson, newphoto)
+            messagebox.showinfo("Database", "Person was successfully added to the database.")
+            self.destroy()
         except Error as e:
-            messagebox.showerror("Error", "Invaild input.")
+            messagebox.showerror("Error", "Error likly Invaild Input. Check error message, could be the image was to large this can be changed in the mysql config files (Google error message).")
 
     def btnFile(self):
         self.directory = filedialog.askopenfilename(initialdir = "C:\\", title = "Select file", filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
@@ -165,22 +167,22 @@ class addPhoto(Toplevel):
         self.image.grid(row = 3, column = 1) 
         self.filebtn = Button(self, text="File path", command=self.btnFile)
         self.filebtn.grid(row = 3, column = 3)
-       
-
         sumbitbtn = Button(self, text="Sumbit", command=self.btnClick).grid(row = 12)
 
     def btnClick(self):
         try:
             newphoto = Photo(self.pid.get(), DAO.convertToBinaryB64(filename=str(self.directory)))
             DAO.insertPhoto(newphoto)
+            messagebox.showinfo("Database", "Photo was successfully added to the database.")
+            self.destroy()
         except Error as e:
-            messagebox.showerror("Error", "Invaild input.")
+            messagebox.showerror("Error", "Error likly Invaild Input. Check error message, could be the image was to large this can be changed in the mysql config files (Google error message).")
 
     def btnName(self):
         try:
-            pid = DAO.getName(self.name.get().lower())[0]
+            p = DAO.getByName(self.name.get().lower())
             self.pid.insert(INSERT,"")
-            self.pid.insert(INSERT,pid)
+            self.pid.insert(INSERT,p.pid)
         except Error as e:
             messagebox.showerror("Error", "Invaild input.")
 

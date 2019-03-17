@@ -14,15 +14,24 @@ class Person:
     def __init__(self, pid, name = None, dob = None, nationality = None, height = 0, weight = 0, hair_colour = None, hair_style = None, skin_colour = None, facial_hair = None):
         self.pid = pid
         self.name = name 
-        self.dob = dob
-        self.nationality = nationality
-        self.height = height 
+        self.dob = self.rec(dob)
+        self.nationality = self.rec(nationality)
+        self.height = height
         self.weight = weight
-        self.hair_colour = hair_colour
-        self.hair_style = hair_style
-        self.skin_colour = skin_colour
-        self.facial_hair = facial_hair
-        
+        self.hair_colour = self.rec(hair_colour)
+        self.hair_style = self.rec(hair_style)
+        self.skin_colour = self.rec(skin_colour)
+        self.facial_hair = self.rec(facial_hair)
+
+    def __str__(self): # equivalent to override toString()
+        return "PID: {0}\nName: {1}\nDOB: {2}\nNationality: {3}\nHeight: {4}\nWeight: {5}\nHair colour: {6}\nHair style: {7}\nSkin Colour: {8}\nFacial hair: {9}\n".format(str(self.pid), self.name, self.dob, self.nationality, self.rec(self.height), self.rec(self.weight), self.hair_colour, self.hair_style, self.skin_colour, self.facial_hair)
+      
+    def rec(self, record): # db record to string 
+        if record is None:
+            return "N/A"
+        else:
+            return str(record)
+
 class Photo:
     def __init__(self, pid, image = None, encoding = None, encoded = None):
         self.pid = pid
@@ -124,17 +133,18 @@ class personDAO:
             self.mycursor.close()
             self.mydb.close()
 
-    def getName(self, name): 
+    def getByName(self, name): 
         try:
             self.mydb = self.connectToMysql()
             self.mycursor = self.mydb.cursor()
-            self.mycursor.execute("SELECT pid FROM person WHERE name='%s'" % (name))
+            self.mycursor.execute("SELECT * FROM person WHERE name='%s'" % (name))
             self.result = self.mycursor.fetchall()
             self.mydb.commit()
         except Error as e:
             print(e)
         else:
-            return self.result
+            p = self.result[0]
+            return Person(p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9])
         finally:
             self.mycursor.close()
             self.mydb.close()

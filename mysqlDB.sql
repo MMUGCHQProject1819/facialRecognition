@@ -1,3 +1,5 @@
+CREATE DATABASE project;
+USE project;
 CREATE TABLE `person` (
   `pid` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
